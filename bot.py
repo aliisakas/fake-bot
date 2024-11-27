@@ -1,14 +1,15 @@
+import asyncio
 from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
 from aiogram.utils import executor
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, Message
 from aiogram.dispatcher.filters import Text
-import asyncio
+
 
 from config import TOKEN
 
 import news_check
-import top_authors
+#pimport top_authors
 import mailing
 import add_author
 
@@ -90,11 +91,11 @@ async def process_name(message: types.Message, state: FSMContext):
     await ms_to_users.next()
 
 
-@dp.message_handler(Text(equals="авторы с наибольшим уровнем доверия"))
-async def process_help_command(message: Message):
-    auth = top_authors.checklist()
-    for i in range(len(auth)):
-        await message.answer(f'''{i + 1}) Имя: {auth[i][0]}; Количество правдивых новостей: {auth[i][1][0]}''')
+# @dp.message_handler(Text(equals="авторы с наибольшим уровнем доверия"))
+# async def process_help_command(message: Message):
+#     auth = top_authors.checklist()
+#     for i in range(len(auth)):
+#         await message.answer(f'''{i + 1}) Имя: {auth[i][0]}; Количество правдивых новостей: {auth[i][1][0]}''')
 
 
 @dp.message_handler(Text(equals="рассылка"))
