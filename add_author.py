@@ -46,6 +46,11 @@ def check_user_in_base(user_name):
             print("Соединение с SQLite закрыто")
 
 
+
+
+
+
+
 def add_user(name_au, fake_true):
     try:
         sqlite_connection = sqlite3.connect('main_db/confidence.db')
@@ -56,7 +61,7 @@ def add_user(name_au, fake_true):
             if fake_true:
                 up = f"""UPDATE authors 
                     SET true_news = true_news + 1 
-                    WHERE name = {name_au};"""
+                    WHERE name = '{name_au}';"""
             else:
                 up = f"""UPDATE authors 
                     SET fake_news = fake_news + 1 
