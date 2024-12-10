@@ -5,11 +5,12 @@ from aiogram.utils import executor
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, Message
 from aiogram.dispatcher.filters import Text
 
+from googletrans import Translator
 
 from config import TOKEN
 
 import news_check
-#pimport top_authors
+import top_authors
 import mailing
 import add_author
 
@@ -56,7 +57,7 @@ async def process_help_command(message: types.Message):
     await bot.send_message(message.chat.id, '''Функции бота:
     * 📰 Проверка новости(Пришлите новость в чат и бот проверит ее) *
     * 🔝 авторы с наибольшим уровнем доверия(Бот выведет топ 10 проверенных авторов) *
-    * ✉ Подписка на рассылку(Бот будет оповещать вас о всех текущих новостях) *''')
+    * ✉️ Подписка на рассылку(Бот будет оповещать вас о всех текущих новостях) *''')
 
 
 # Класс с состояниями
@@ -70,36 +71,68 @@ async def process_help_command(message: Message):
     await ms_to_users.text.set()
 
 
+
+# Инициализация переводчика
+translator = Translator()
+
 @dp.message_handler(state=ms_to_users.text)
 async def process_name(message: types.Message, state: FSMContext):
-    await message.answer('⏱ Новость обрабатывается')
+    await message.answer('⏱️ Новость обрабатывается')
+
     name_author, text_pred = message.text.split(" Text: ")
+
+    # Определяем язык текста
+    detected_language = translator.detect(text_pred).lang
+    await message.answer(f"Обнаружен язык текста: {detected_language}")
+
+    # Переводим текст, если он на русском
+    if detected_language == 'ru':
+        text_pred = translator.translate(text_pred, src='ru', dest='en').text
+        await message.answer(f"Переведённая новость: {text_pred}")
+    else:
+        text_pred = text_pred  # Если текст уже на английском, оставляем его без изменений
+        # await message.answer("Текст уже на английском, перевод не требуется.")
+
+    # Проверка новости
     pred_result = news_check.pred(text_pred)
+    print(pred_result)
     if pred_result:
-        await message.answer('✔ Новость скорее всего правдивая')
+        await message.answer('✔️ Новость скорее всего правдивая')
     else:
         await message.answer('❌ Новость скорее всего ложная')
+
+    # Сохраняем информацию об авторе
     add_author.add_user(name_author, pred_result)
+
+    # Рассылка другим пользователям
     for_send = mailing.get_users()
     for i in for_send:
         if i != message.chat.id:
             await bot.send_message(i, message.text)
             if pred_result:
-                await bot.send_message(i, '✔ Новость скорее всего правдивая')
+                await bot.send_message(i, '✔️ Новость скорее всего правдивая')
             else:
                 await bot.send_message(i, '❌ Новость скорее всего ложная')
+
+    # Завершаем состояние
     await ms_to_users.next()
 
 
-# @dp.message_handler(Text(equals="авторы с наибольшим уровнем доверия"))
-# async def process_help_command(message: Message):
-#     auth = top_authors.checklist()
-#     for i in range(len(auth)):
-#         await message.answer(f'''{i + 1}) Имя: {auth[i][0]}; Количество правдивых новостей: {auth[i][1][0]}''')
+
+
+
+@dp.message_handler(Text(equals="авторы с наибольшим уровнем доверия"))
+async def process_help_command(message: Message):
+    auth = top_authors.checklist()
+    for i in range(len(auth)):
+        await message.answer(f'''{i + 1}) Имя: {auth[i][0]}; Количество правдивых новостей: {auth[i][1][0]}''')
 
 
 @dp.message_handler(Text(equals="рассылка"))
 async def process_help_command(message: Message):
+    """
+    gfhgfjhfjhghgjh
+    """
     if mailing.check_user_in_base(message.chat.id):
         keyboard = ReplyKeyboardMarkup(resize_keyboard=True).add(KeyboardButton(text="Отписаться"))
     else:
