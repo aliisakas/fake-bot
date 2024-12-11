@@ -130,9 +130,6 @@ async def process_help_command(message: Message):
 
 @dp.message_handler(Text(equals="рассылка"))
 async def process_help_command(message: Message):
-    """
-    gfhgfjhfjhghgjh
-    """
     if mailing.check_user_in_base(message.chat.id):
         keyboard = ReplyKeyboardMarkup(resize_keyboard=True).add(KeyboardButton(text="Отписаться"))
     else:
