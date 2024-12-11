@@ -151,7 +151,7 @@ async def process_help_command(message: Message):
 @dp.message_handler(Text(equals="Отписаться"))
 async def process_help_command(message: Message):
     mailing.del_user(message.chat.id)
-    keyboard = ReplyKeyboardMarkup(resize_keyboard=True).add(KeyboardButton(text="Отписаться"))
+    keyboard = ReplyKeyboardMarkup(resize_keyboard=True).add(KeyboardButton(text="Подписаться"))
     await bot.send_message(message.chat.id, "Успешно!", reply_markup=keyboard)
     asyncio.get_running_loop().create_task(send_start_menu(message))
 
